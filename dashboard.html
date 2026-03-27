@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Math Quest - Dashboard</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #43cea2, #185a9d);
+      color: white;
+      text-align: center;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    h1 {
+      font-size: 3em;
+      margin-bottom: 10px;
+    }
+    .username {
+      font-size: 1.5em;
+      margin-bottom: 20px;
+      color: #ffeb3b;
+    }
+    .btn {
+      background: #ff4081;
+      border: none;
+      color: white;
+      padding: 15px 30px;
+      font-size: 1.2em;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .btn:hover {
+      background: #ff79b0;
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+  <h1>Welcome to Math Quest ⚔️</h1>
+  <div class="username" id="usernameDisplay"></div>
+  <button class="btn" onclick="startQuest()">Start New Quest</button>
+  <button class="btn" style="background:#03a9f4; margin-top:10px;" onclick="logout()">Log Out</button>
+
+  <script>
+    const user = localStorage.getItem('mathQuestUser');
+    if (!user) {
+      window.location.href = 'index.html'; // redirect if not logged in
+    } else {
+      document.getElementById('usernameDisplay').textContent = `Hero: ${user}`;
+    }
+
+    function startQuest() {
+      window.location.href = 'quest.html';
+    }
+
+    function logout() {
+      localStorage.removeItem('mathQuestUser');
+      window.location.href = 'index.html';
+    }
+  </script>
+</body>
+</html>

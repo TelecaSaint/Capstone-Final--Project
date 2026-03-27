@@ -1,0 +1,633 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Quest - Teacher Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+            min-height: 100vh;
+            animation: fadeIn 0.6s ease;
+        }
+
+        /* Header */
+        .dashboard-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px 35px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        .header-left h1 {
+            font-size: 1.6em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .header-left p {
+            font-size: 1em;
+            opacity: 0.9;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 10px 20px;
+            border-radius: 10px;
+        }
+
+        .header-right:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* Main Content */
+        .dashboard-content {
+            padding: 35px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 25px;
+            padding: 35px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+            animation: slideUp 0.6s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+        }
+
+        .card-header {
+            font-size: 1.6em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 25px;
+        }
+
+        /* Overview Card */
+        .overview-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .overview-card .card-header {
+            color: white;
+            font-size: 1.8em;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .stat-box {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 1em;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 3.5em;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        /* Performance Chart */
+        .chart-container {
+            background: rgba(255,255,255,0.1);
+            padding: 25px;
+            border-radius: 15px;
+        }
+
+        .chart-title {
+            font-weight: bold;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .chart {
+            height: 120px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            border-bottom: 3px solid rgba(255,255,255,0.3);
+            gap: 15px;
+        }
+
+        .chart-bar {
+            flex: 1;
+            background: #4CAF50;
+            border-radius: 8px 8px 0 0;
+            transition: all 0.5s ease;
+            position: relative;
+        }
+
+        .chart-bar:hover {
+            opacity: 0.8;
+            transform: translateY(-5px);
+        }
+
+        .chart-bar.warning {
+            background: #FFC107;
+        }
+
+        .chart-labels {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 10px;
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        /* Two Column Grid */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        /* Top Performers */
+        .performers-card {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            animation: slideUp 0.6s ease 0.2s backwards;
+        }
+
+        .performer-list {
+            line-height: 2.5;
+            font-size: 1.1em;
+        }
+
+        .performer-item {
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .performer-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Need Attention */
+        .attention-card {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            animation: slideUp 0.6s ease 0.3s backwards;
+        }
+
+        .attention-card .card-header {
+            color: #f5576c;
+        }
+
+        .attention-list {
+            line-height: 2.5;
+            font-size: 1.1em;
+            margin-bottom: 25px;
+        }
+
+        .attention-item {
+            padding: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-alert {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border: none;
+            border-radius: 15px;
+            color: white;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(245, 87, 108, 0.3);
+        }
+
+        .btn-alert:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(245, 87, 108, 0.5);
+        }
+
+        /* Student Table */
+        .table-container {
+            overflow-x: auto;
+            animation: slideUp 0.6s ease 0.4s backwards;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #f5f5f5;
+        }
+
+        th {
+            padding: 18px;
+            text-align: left;
+            font-weight: bold;
+            color: #667eea;
+            border-bottom: 3px solid #e0e0e0;
+        }
+
+        td {
+            padding: 18px;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.3s ease;
+        }
+
+        tbody tr:hover {
+            background: #f9f9f9;
+        }
+
+        .level-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            font-weight: bold;
+        }
+
+        .accuracy-high {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        .accuracy-medium {
+            color: #FFC107;
+            font-weight: bold;
+        }
+
+        .accuracy-low {
+            color: #f5576c;
+            font-weight: bold;
+        }
+
+        .inactive {
+            color: #f5576c;
+        }
+
+        .view-all {
+            text-align: center;
+            margin-top: 25px;
+        }
+
+        .view-all a {
+            color: #667eea;
+            font-weight: bold;
+            text-decoration: none;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+            padding: 10px 20px;
+            border-radius: 8px;
+        }
+
+        .view-all a:hover {
+            background: rgba(102, 126, 234, 0.1);
+            text-decoration: underline;
+        }
+
+        /* Back Button */
+        .back-button {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 18px 35px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .back-button:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.6);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-content {
+                padding: 20px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .header-left h1 {
+                font-size: 1.2em;
+            }
+
+            .header-left p {
+                font-size: 0.9em;
+            }
+
+            .stat-value {
+                font-size: 2.5em;
+            }
+
+            .card {
+                padding: 25px;
+            }
+
+            table {
+                font-size: 0.9em;
+            }
+
+            th, td {
+                padding: 12px 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="dashboard-header">
+        <div class="header-left">
+            <h1>Math Quest Admin</h1>
+            <p>👨‍🏫 Mrs. Williams</p>
+        </div>
+        <div class="header-right">
+            <span>📊</span>
+            <span>Analytics</span>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="dashboard-content">
+        <!-- Class Overview -->
+        <div class="card overview-card">
+            <div class="card-header">CLASS OVERVIEW - Grade 6A</div>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-label">Total Students</div>
+                    <div class="stat-value">24</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Active Today</div>
+                    <div class="stat-value">18</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Average Score</div>
+                    <div class="stat-value">84%</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Completion Rate</div>
+                    <div class="stat-value">76%</div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-title">📈 Performance Trend (Last 4 Weeks)</div>
+                <div class="chart">
+                    <div class="chart-bar" style="height: 60%;"></div>
+                    <div class="chart-bar" style="height: 75%;"></div>
+                    <div class="chart-bar" style="height: 85%;"></div>
+                    <div class="chart-bar warning" style="height: 70%;"></div>
+                </div>
+                <div class="chart-labels">
+                    <span>Week 1</span>
+                    <span>Week 2</span>
+                    <span>Week 3</span>
+                    <span>Week 4</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Performers and Need Attention -->
+        <div class="grid-2">
+            <div class="card performers-card">
+                <div class="card-header">🏆 TOP PERFORMERS</div>
+                <div class="performer-list">
+                    <div class="performer-item">1. Sarah J. - <strong>98%</strong></div>
+                    <div class="performer-item">2. Alex M. - <strong>95%</strong></div>
+                    <div class="performer-item">3. James K. - <strong>92%</strong></div>
+                    <div class="performer-item">4. Emma L. - <strong>90%</strong></div>
+                    <div class="performer-item">5. David R. - <strong>88%</strong></div>
+                </div>
+            </div>
+
+            <div class="card attention-card">
+                <div class="card-header">⚠ NEED ATTENTION</div>
+                <div class="attention-list">
+                    <div class="attention-item">
+                        <span>📉</span>
+                        <span>Mike R. - Below 60%</span>
+                    </div>
+                    <div class="attention-item">
+                        <span>⏰</span>
+                        <span>Emma T. - Inactive 5 days</span>
+                    </div>
+                    <div class="attention-item">
+                        <span>❌</span>
+                        <span>Tom S. - Struggling with algebra</span>
+                    </div>
+                    <div class="attention-item">
+                        <span>📊</span>
+                        <span>Lisa M. - Low completion rate</span>
+                    </div>
+                </div>
+                <button class="btn-alert" onclick="sendAlerts()">
+                    SEND ALERTS
+                </button>
+            </div>
+        </div>
+
+        <!-- Student Progress Table -->
+        <div class="card table-container">
+            <div class="card-header">📋 STUDENT PROGRESS TABLE</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Level</th>
+                        <th>Problems</th>
+                        <th>Accuracy</th>
+                        <th>Last Active</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Sarah J.</strong></td>
+                        <td><span class="level-badge">12</span></td>
+                        <td>156</td>
+                        <td class="accuracy-high">98%</td>
+                        <td>Today</td>
+                        <td><button class="view-btn" onclick="viewStudent('Sarah J.')">View →</button></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Alex M.</strong></td>
+                        <td><span class="level-badge">7</span></td>
+                        <td>89</td>
+                        <td class="accuracy-high">92%</td>
+                        <td>Today</td>
+                        <td><button class="view-btn" onclick="viewStudent('Alex M.')">View →</button></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Mike R.</strong></td>
+                        <td><span class="level-badge">4</span></td>
+                        <td>34</td>
+                        <td class="accuracy-low">58%</td>
+                        <td class="inactive">2 days ago</td>
+                        <td><button class="view-btn" onclick="viewStudent('Mike R.')">View →</button></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Emma L.</strong></td>
+                        <td><span class="level-badge">5</span></td>
+                        <td>67</td>
+                        <td class="accuracy-medium">85%</td>
+                        <td class="inactive">5 days ago</td>
+                        <td><button class="view-btn" onclick="viewStudent('Emma L.')">View →</button></td>
+                    </tr>
+                    <tr>
+                        <td><strong>James K.</strong></td>
+                        <td><span class="level-badge">9</span></td>
+                        <td>124</td>
+                        <td class="accuracy-high">92%</td>
+                        <td>Today</td>
+                        <td><button class="view-btn" onclick="viewStudent('James K.')">View →</button></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Lisa M.</strong></td>
+                        <td><span class="level-badge">3</span></td>
+                        <td>28</td>
+                        <td class="accuracy-medium">72%</td>
+                        <td>Yesterday</td>
+                        <td><button class="view-btn" onclick="viewStudent('Lisa M.')">View →</button></td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="view-all">
+                <a href="#all-students">View All Students →</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <button class="back-button" onclick="window.location.href='dashboard.html'">
+        ← Student View
+    </button>
+
+    <script>
+        // Send alerts function
+        function sendAlerts() {
+            const students = ['Mike R.', 'Emma T.', 'Tom S.', 'Lisa M.'];
+            if (confirm(`Send reminder alerts to ${students.length} students?\n\n${students.join('\n')}`)) {
+                alert('✅ Alerts sent successfully to all students who need attention!');
+            }
+        }
+
+        // View student details
+        function viewStudent(studentName) {
+            alert(`Opening detailed view for ${studentName}...\n\nThis would show:\n• Complete problem history\n• Time spent per topic\n• Detailed accuracy breakdown\n• Progress over time\n• Recommendations`);
+        }
+
+        // Animate chart bars on load
+        window.addEventListener('load', function() {
+            const bars = document.querySelectorAll('.chart-bar');
+            bars.forEach((bar, index) => {
+                bar.style.height = '0';
+                setTimeout(() => {
+                    bar.style.transition = 'height 1s ease';
+                    bar.style.height = bar.getAttribute('style').match(/height: (\d+%)/)[1];
+                }, index * 200);
+            });
+        });
+
+        // Add hover effect to table rows
+        const tableRows = document.querySelectorAll('tbody tr');
+        tableRows.forEach(row => {
+            row.style.cursor = 'pointer';
+            row.addEventListener('click', function(e) {
+                if (e.target.tagName !== 'BUTTON') {
+                    const studentName = this.querySelector('td strong').textContent;
+                    viewStudent(studentName);
+                }
+            });
+        });
+    </script>
+
+    <style>
+        .view-btn {
+            padding: 8px 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .view-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+    </style>
+</body>
+</html>
