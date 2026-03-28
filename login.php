@@ -1,4 +1,68 @@
+<?php
+require_once 'config.php';
 
+$error = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $username = strtolower(trim($_POST['username'] ?? ''));
+    $password = $_POST['password'] ?? '';
+    $role     = $_POST['role'] ?? 'student';
+
+    try {
+        $stmt = db()->prepare("
+            SELECT id, username, password, full_name, role, avatar
+            FROM users
+            WHERE username = :username
+              AND role = :role
+            LIMIT 1
+        ");
+
+        $stmt->execute([
+            ':username' => $username,
+            ':role' => $role
+        ]);
+
+        $user = $stmt->fetch();
+
+        if ($user && password_verify($password, $user['password'])) {
+
+            $_SESSION['user'] = [
+                'id' => $user['id'],
+                'username' => $user['username'],
+                'full_name' => $user['full_name'],
+                'role' => $user['role'],
+                'avatar' => $user['avatar']
+            ];
+
+            $update = db()->prepare("
+                UPDATE users
+                SET last_login = NOW()
+                WHERE id = :id
+            ");
+
+            $update->execute([
+                ':id' => $user['id']
+            ]);
+
+            if ($user['role'] === 'admin') {
+                redirect('admin.php');
+            } else {
+                redirect('dashboard.php');
+            }
+        } else {
+            $error = 'Invalid username or password.';
+        }
+
+    } catch (PDOException $e) {
+        $error = 'Database error: ' . $e->getMessage();
+    }
+}
+?>
+
+<?php
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
