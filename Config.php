@@ -29,8 +29,13 @@ function db(): PDO {
 }
 
 // ── Session bootstrap ─────────────────────────────────────────
-session_name(SESSION_NAME);
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    ini_set('session.cookie_path', '/');
+    ini_set('session.cookie_httponly', 1);
+    ini_set('session.use_strict_mode', 1);
+    session_name(SESSION_NAME);
+    session_start();
+}
 
 // ── Helper: JSON response ─────────────────────────────────────
 function json_out(array $data, int $code = 200): void {

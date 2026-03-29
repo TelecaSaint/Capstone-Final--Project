@@ -1,0 +1,25 @@
+<?php
+// session_test.php
+// Put this in your MathQuest folder and visit it AFTER logging in
+// It will show us exactly what's in your session
+
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+
+session_start();
+
+echo "<h2>Session Debug</h2>";
+echo "<b>Session ID:</b> " . session_id() . "<br>";
+echo "<b>Session Status:</b> " . session_status() . "<br><br>";
+
+echo "<b>Session contents:</b><pre>";
+print_r($_SESSION);
+echo "</pre>";
+
+echo "<b>Cookies:</b><pre>";
+print_r($_COOKIE);
+echo "</pre>";
+
+echo "<b>PHP Session save path:</b> " . session_save_path() . "<br>";
+echo "<b>Session name:</b> " . session_name() . "<br>";
+?>

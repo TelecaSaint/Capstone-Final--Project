@@ -48,37 +48,73 @@ $notifRows = $notifs->fetchAll();
 $days=['M','T','W','T','F','S','S'];
 $today=(int)date('N');
 ?><!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MathQuest — Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#080b14;--s1:#0e1220;--s2:#141827;--s3:#1a2035;--b:rgba(255,255,255,0.07);--bb:rgba(255,255,255,0.12);--cyan:#00e5ff;--cdim:rgba(0,229,255,0.1);--violet:#7c3aed;--vdim:rgba(124,58,237,0.15);--amber:#ffab00;--adim:rgba(255,171,0,0.15);--green:#00e676;--gdim:rgba(0,230,118,0.12);--red:#ff5252;--text:#e8eaf2;--tdim:rgba(232,234,242,0.42);--tmid:rgba(232,234,242,0.68)}
+/* ── Dark mode (default) ───────────────────────────────────── */
+:root, [data-theme="dark"] {
+  --bg:#080b14;--s1:#0e1220;--s2:#141827;--s3:#1a2035;
+  --b:rgba(255,255,255,0.07);--bb:rgba(255,255,255,0.12);
+  --cyan:#00e5ff;--cdim:rgba(0,229,255,0.1);
+  --violet:#7c3aed;--vdim:rgba(124,58,237,0.15);
+  --amber:#ffab00;--adim:rgba(255,171,0,0.15);
+  --green:#00e676;--gdim:rgba(0,230,118,0.12);
+  --red:#ff5252;--text:#e8eaf2;
+  --tdim:rgba(232,234,242,0.42);--tmid:rgba(232,234,242,0.68);
+  --nav-bg:rgba(8,11,20,0.97);
+  --shadow:0 24px 60px rgba(0,0,0,0.5);
+  --chart-area-start:rgba(0,229,255,0.25);
+  --chart-area-end:rgba(0,229,255,0);
+}
+
+/* ── Light mode ────────────────────────────────────────────── */
+[data-theme="light"] {
+  --bg:#f0f4ff;--s1:#ffffff;--s2:#e8edf8;--s3:#d8e0f0;
+  --b:rgba(0,0,0,0.08);--bb:rgba(0,0,0,0.15);
+  --cyan:#0077cc;--cdim:rgba(0,119,204,0.10);
+  --violet:#6d28d9;--vdim:rgba(109,40,217,0.10);
+  --amber:#c47f00;--adim:rgba(196,127,0,0.12);
+  --green:#00a854;--gdim:rgba(0,168,84,0.10);
+  --red:#cc3333;--text:#0f1423;
+  --tdim:rgba(15,20,35,0.45);--tmid:rgba(15,20,35,0.72);
+  --nav-bg:rgba(240,244,255,0.97);
+  --shadow:0 8px 32px rgba(0,0,0,0.10);
+  --chart-area-start:rgba(0,119,204,0.18);
+  --chart-area-end:rgba(0,119,204,0);
+}
+
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-nav{display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:60px;background:rgba(8,11,20,0.97);border-bottom:1px solid var(--b);position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background 0.3s,color 0.3s}
+nav{display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:60px;background:var(--nav-bg);border-bottom:1px solid var(--b);position:sticky;top:0;z-index:100;backdrop-filter:blur(12px);transition:background 0.3s,border-color 0.3s}
 .nav-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.15em;background:linear-gradient(135deg,var(--cyan),#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none}
 .nav-links{display:flex;align-items:center;gap:4px}
 .nav-link{padding:6px 12px;border-radius:7px;color:var(--tdim);font-family:'Syne',sans-serif;font-size:0.71em;font-weight:600;letter-spacing:0.06em;text-decoration:none;transition:all 0.2s}
 .nav-link:hover{background:var(--s2);color:var(--tmid)}
-.nav-link.active{background:var(--cdim);color:var(--cyan);border:1px solid rgba(0,229,255,0.2)}
+.nav-link.active{background:var(--cdim);color:var(--cyan);border:1px solid rgba(0,119,204,0.2)}
 .nav-right{display:flex;align-items:center;gap:12px}
 .nav-stat{font-size:0.82em;color:var(--tmid);display:flex;align-items:center;gap:5px}
 .nav-stat b{color:var(--cyan)}
 .notif-btn{position:relative;width:34px;height:34px;border-radius:8px;background:var(--s2);border:1px solid var(--b);display:flex;align-items:center;justify-content:center;cursor:pointer;text-decoration:none;font-size:1em;transition:all 0.2s}
 .notif-btn:hover{background:var(--s3)}
 .notif-badge{position:absolute;top:-4px;right:-4px;width:16px;height:16px;border-radius:50%;background:var(--red);font-size:0.6em;font-family:'Syne',sans-serif;font-weight:700;display:flex;align-items:center;justify-content:center;color:#fff}
-.nav-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--cdim),var(--vdim));border:1px solid rgba(0,229,255,0.3);display:flex;align-items:center;justify-content:center;font-size:1.1em;text-decoration:none}
-.logout{padding:6px 12px;background:rgba(255,82,82,0.08);border:1px solid rgba(255,82,82,0.2);border-radius:7px;color:#ff8a80;font-family:'Syne',sans-serif;font-size:0.71em;font-weight:600;text-decoration:none;transition:all 0.2s}
+.nav-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--cdim),var(--vdim));border:1px solid var(--cyan);display:flex;align-items:center;justify-content:center;font-size:1.1em;text-decoration:none;opacity:0.8}
+.logout{padding:6px 12px;background:rgba(255,82,82,0.08);border:1px solid rgba(255,82,82,0.2);border-radius:7px;color:var(--red);font-family:'Syne',sans-serif;font-size:0.71em;font-weight:600;text-decoration:none;transition:all 0.2s}
 .logout:hover{background:rgba(255,82,82,0.16)}
+
+/* ── Theme toggle ──────────────────────────────────────────── */
+.theme-toggle{background:var(--s2);border:1px solid var(--b);border-radius:20px;padding:5px 12px;cursor:pointer;font-family:'Syne',sans-serif;font-size:0.71em;font-weight:600;color:var(--tmid);display:flex;align-items:center;gap:5px;transition:all 0.22s;letter-spacing:0.05em}
+.theme-toggle:hover{border-color:var(--bb);color:var(--text)}
+
 .main{padding:24px 28px;max-width:1500px;margin:0 auto}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
 .g3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:20px}
 .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
 .ghero{display:grid;grid-template-columns:290px 1fr;gap:20px;margin-bottom:20px}
-.panel{background:var(--s1);border:1px solid var(--b);border-radius:14px;padding:22px;position:relative;overflow:hidden;transition:border-color 0.25s;animation:pIn 0.45s ease backwards}
+.panel{background:var(--s1);border:1px solid var(--b);border-radius:14px;padding:22px;position:relative;overflow:hidden;transition:border-color 0.25s,background 0.3s;animation:pIn 0.45s ease backwards}
 .panel:hover{border-color:var(--bb)}
 .panel::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.013) 0%,transparent 60%);pointer-events:none}
 @keyframes pIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
@@ -88,7 +124,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:0 28px
 .scard{padding:18px 20px}
 .sc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
 .sc-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1.1em}
-.sc-icon.cyan{background:var(--cdim);border:1px solid rgba(0,229,255,0.2)}
+.sc-icon.cyan{background:var(--cdim);border:1px solid rgba(0,119,204,0.2)}
 .sc-icon.violet{background:var(--vdim);border:1px solid rgba(124,58,237,0.25)}
 .sc-icon.amber{background:var(--adim);border:1px solid rgba(255,171,0,0.25)}
 .sc-icon.green{background:var(--gdim);border:1px solid rgba(0,230,118,0.2)}
@@ -96,28 +132,28 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:0 28px
 .sc-val{font-family:'Syne',sans-serif;font-weight:800;font-size:2em;line-height:1;margin-bottom:3px}
 .sc-val.cyan{color:var(--cyan)}.sc-val.violet{color:#a78bfa}.sc-val.amber{color:var(--amber)}.sc-val.green{color:var(--green)}
 .sc-label{font-size:0.78em;color:var(--tdim)}
-.char-av{width:76px;height:76px;margin:0 auto 12px;border-radius:50%;background:linear-gradient(135deg,var(--cdim),var(--vdim));border:2px solid rgba(0,229,255,0.3);display:flex;align-items:center;justify-content:center;font-size:2.4em;animation:avPulse 3s ease-in-out infinite}
-@keyframes avPulse{0%,100%{box-shadow:0 0 16px rgba(0,229,255,0.15)}50%{box-shadow:0 0 30px rgba(0,229,255,0.3)}}
+.char-av{width:76px;height:76px;margin:0 auto 12px;border-radius:50%;background:linear-gradient(135deg,var(--cdim),var(--vdim));border:2px solid var(--cyan);display:flex;align-items:center;justify-content:center;font-size:2.4em;animation:avPulse 3s ease-in-out infinite}
+@keyframes avPulse{0%,100%{box-shadow:0 0 16px var(--cdim)}50%{box-shadow:0 0 30px var(--cdim)}}
 .char-name{text-align:center;font-family:'Syne',sans-serif;font-weight:700;font-size:1.05em;margin-bottom:3px}
 .char-title{text-align:center;font-size:0.79em;color:var(--cyan);margin-bottom:16px}
 .xp-row{display:flex;justify-content:space-between;font-size:0.74em;color:var(--tdim);margin-bottom:5px}
 .bar{height:6px;background:var(--s2);border-radius:3px;overflow:hidden;margin-bottom:16px}
 .bar-fill{height:100%;border-radius:3px;transition:width 1.4s cubic-bezier(0.25,1,0.5,1)}
-.bar-fill.cyan{background:linear-gradient(90deg,#0099cc,var(--cyan));box-shadow:0 0 8px rgba(0,229,255,0.4)}
+.bar-fill.cyan{background:linear-gradient(90deg,#0099cc,var(--cyan));box-shadow:0 0 8px var(--cdim)}
 .mini-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
 .ms-box{background:var(--s2);border:1px solid var(--b);border-radius:8px;padding:9px 6px;text-align:center}
 .ms-val{font-family:'Syne',sans-serif;font-weight:700;font-size:1.05em;color:var(--cyan)}
 .ms-lbl{font-size:0.67em;color:var(--tdim);margin-top:2px}
-.cta{width:100%;padding:11px;background:linear-gradient(135deg,var(--cyan),#0099cc);border:none;border-radius:9px;color:#020d14;font-family:'Syne',sans-serif;font-size:0.81em;font-weight:700;letter-spacing:0.09em;cursor:pointer;transition:all 0.22s;box-shadow:0 4px 18px rgba(0,229,255,0.25)}
-.cta:hover{transform:translateY(-2px);box-shadow:0 8px 26px rgba(0,229,255,0.38)}
-.cta.amber{background:linear-gradient(135deg,var(--amber),#ff6f00);box-shadow:0 4px 18px rgba(255,171,0,0.25)}
+.cta{width:100%;padding:11px;background:linear-gradient(135deg,var(--cyan),#0099cc);border:none;border-radius:9px;color:#020d14;font-family:'Syne',sans-serif;font-size:0.81em;font-weight:700;letter-spacing:0.09em;cursor:pointer;transition:all 0.22s;box-shadow:0 4px 18px var(--cdim)}
+.cta:hover{transform:translateY(-2px)}
+.cta.amber{background:linear-gradient(135deg,var(--amber),#ff6f00);box-shadow:0 4px 18px var(--adim)}
 .streak-row{display:flex;gap:5px;justify-content:center;margin:10px 0}
 .sk-dot{width:27px;height:27px;border-radius:50%;border:1px solid var(--b);background:var(--s2);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:0.59em;color:var(--tdim);font-weight:600}
-.sk-dot.on{background:var(--cdim);border-color:rgba(0,229,255,0.35);color:var(--cyan)}
-.sk-dot.now{background:rgba(255,171,0,0.15);border-color:rgba(255,171,0,0.4);color:var(--amber);animation:skPulse 1.5s ease infinite}
-@keyframes skPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,171,0,0.4)}50%{box-shadow:0 0 0 5px rgba(255,171,0,0)}}
-.quest-active{background:linear-gradient(135deg,rgba(0,229,255,0.06),rgba(124,58,237,0.09));border-color:rgba(0,229,255,0.2)}
-.qa-badge{display:inline-block;padding:3px 9px;border-radius:5px;font-family:'Syne',sans-serif;font-size:0.63em;font-weight:600;letter-spacing:0.08em;background:var(--cdim);color:var(--cyan);border:1px solid rgba(0,229,255,0.2)}
+.sk-dot.on{background:var(--cdim);border-color:var(--cyan);color:var(--cyan)}
+.sk-dot.now{background:var(--adim);border-color:var(--amber);color:var(--amber);animation:skPulse 1.5s ease infinite}
+@keyframes skPulse{0%,100%{box-shadow:0 0 0 0 var(--adim)}50%{box-shadow:0 0 0 5px transparent}}
+.quest-active{background:linear-gradient(135deg,var(--cdim),var(--vdim));border-color:var(--cyan)}
+.qa-badge{display:inline-block;padding:3px 9px;border-radius:5px;font-family:'Syne',sans-serif;font-size:0.63em;font-weight:600;letter-spacing:0.08em;background:var(--cdim);color:var(--cyan);border:1px solid var(--cyan)}
 .qi{display:flex;align-items:center;gap:13px;padding:12px;background:var(--s2);border:1px solid var(--b);border-radius:10px;margin-bottom:8px;cursor:pointer;transition:all 0.2s;text-decoration:none;color:inherit}
 .qi:hover{background:var(--s3);border-color:var(--bb);transform:translateX(3px)}
 .qi.locked{opacity:0.4;cursor:not-allowed;pointer-events:none}
@@ -125,18 +161,18 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:0 28px
 .qi-name{font-family:'Syne',sans-serif;font-weight:600;font-size:0.88em;margin-bottom:2px}
 .qi-sub{font-size:0.75em;color:var(--tdim)}
 .qi-badge{padding:3px 8px;border-radius:4px;font-family:'Syne',sans-serif;font-size:0.63em;font-weight:600;flex-shrink:0}
-.bi-easy{background:rgba(0,230,118,0.12);color:var(--green);border:1px solid rgba(0,230,118,0.22)}
-.bi-med{background:rgba(255,171,0,0.12);color:var(--amber);border:1px solid rgba(255,171,0,0.22)}
+.bi-easy{background:var(--gdim);color:var(--green);border:1px solid rgba(0,230,118,0.22)}
+.bi-med{background:var(--adim);color:var(--amber);border:1px solid rgba(255,171,0,0.22)}
 .bi-hard{background:rgba(255,82,82,0.1);color:var(--red);border:1px solid rgba(255,82,82,0.2)}
 .bi-lock{background:var(--s3);color:var(--tdim)}
-.ct-line{fill:none;stroke:var(--cyan);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 4px rgba(0,229,255,0.5))}
+.ct-line{fill:none;stroke:var(--cyan);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .ct-area{fill:url(#areaGrad)}
 .ct-dot{fill:var(--cyan);stroke:var(--s1);stroke-width:2}
 .ct-label{fill:var(--tdim);font-family:'DM Sans',sans-serif;font-size:11px}
 .ct-grid{stroke:var(--b);stroke-width:1}
 .lb-item{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:8px;margin-bottom:6px;transition:background 0.2s}
 .lb-item:hover{background:var(--s2)}
-.lb-item.you{background:var(--cdim);border:1px solid rgba(0,229,255,0.18)}
+.lb-item.you{background:var(--cdim);border:1px solid var(--cyan)}
 .lb-rank{font-family:'Syne',sans-serif;font-size:0.77em;font-weight:700;width:20px;color:var(--tdim);flex-shrink:0}
 .lb-rank.top{color:var(--amber)}
 .lb-av{width:28px;height:28px;border-radius:50%;background:var(--s3);border:1px solid var(--b);display:flex;align-items:center;justify-content:center;font-size:0.85em;flex-shrink:0}
@@ -147,11 +183,11 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:0 28px
 .badge-box:hover{background:var(--s3);border-color:var(--bb);transform:scale(1.05)}
 .badge-box span{font-family:'Syne',sans-serif;font-size:0.21em;color:var(--tdim)}
 .badge-box.locked{opacity:0.2}
-.daily-panel{background:linear-gradient(135deg,rgba(255,171,0,0.07),rgba(8,11,20,0.95));border-color:rgba(255,171,0,0.22);text-align:center}
+.daily-panel{background:linear-gradient(135deg,var(--adim),var(--bg));border-color:var(--amber);text-align:center}
 .daily-timer{font-family:'Syne',sans-serif;font-weight:800;font-size:1.55em;color:var(--amber);margin:8px 0;letter-spacing:0.04em}
 .asgn-item{display:flex;align-items:center;gap:12px;padding:11px;background:var(--s2);border:1px solid var(--b);border-radius:9px;margin-bottom:8px;text-decoration:none;color:inherit;transition:all 0.2s}
 .asgn-item:hover{background:var(--s3);border-color:var(--bb)}
-.asgn-icon{width:34px;height:34px;border-radius:8px;background:var(--cdim);border:1px solid rgba(0,229,255,0.2);display:flex;align-items:center;justify-content:center;font-size:1.1em;flex-shrink:0}
+.asgn-icon{width:34px;height:34px;border-radius:8px;background:var(--cdim);border:1px solid var(--cyan);display:flex;align-items:center;justify-content:center;font-size:1.1em;flex-shrink:0}
 .asgn-name{font-family:'Syne',sans-serif;font-weight:600;font-size:0.87em;margin-bottom:2px}
 .asgn-meta{font-size:0.74em;color:var(--tdim)}
 .notif-item{display:flex;gap:10px;padding:10px;background:rgba(255,82,82,0.05);border:1px solid rgba(255,82,82,0.2);border-radius:9px;margin-bottom:7px}
@@ -178,6 +214,10 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:0 28px
     <a href="notifications.php" class="notif-btn">🔔<?php if(count($notifRows)>0):?><span class="notif-badge"><?=count($notifRows)?></span><?php endif;?></a>
     <a href="profile.php" class="nav-avatar"><?= htmlspecialchars($user['avatar']) ?></a>
     <a href="settings.php" class="nav-link" style="padding:6px 10px">⚙</a>
+    <!-- Theme toggle in nav -->
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">
+      <span id="themeIcon">☀️</span><span id="themeLabel">Light</span>
+    </button>
     <a href="logout.php" class="logout">Sign Out</a>
   </div>
 </nav>
@@ -243,10 +283,10 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:0 28px
 
       <div class="panel" style="animation-delay:.28s">
         <div class="ptitle">📚 Quest Library</div>
-        <a class="qi" href="problem.php?subject=algebra"><div class="qi-ico" style="background:rgba(0,229,255,0.1);border:1px solid rgba(0,229,255,0.2)">∑</div><div><div class="qi-name">Algebra Castle</div><div class="qi-sub">Equations, variables</div></div><div class="qi-badge bi-med">MEDIUM</div></a>
-        <a class="qi" href="problem.php?subject=arithmetic"><div class="qi-ico" style="background:rgba(0,230,118,0.1);border:1px solid rgba(0,230,118,0.2)">🔢</div><div><div class="qi-name">Arithmetic Arena</div><div class="qi-sub">Addition, multiplication</div></div><div class="qi-badge bi-easy">EASY</div></a>
-        <a class="qi" href="problem.php?subject=fractions"><div class="qi-ico" style="background:rgba(124,58,237,0.12);border:1px solid rgba(124,58,237,0.22)">½</div><div><div class="qi-name">Fraction Dungeon</div><div class="qi-sub">Fractions, decimals</div></div><div class="qi-badge bi-med">MEDIUM</div></a>
-        <a class="qi" href="problem.php?subject=geometry"><div class="qi-ico" style="background:rgba(255,171,0,0.1);border:1px solid rgba(255,171,0,0.2)">📐</div><div><div class="qi-name">Geometry Galaxy</div><div class="qi-sub">Shapes, angles</div></div><div class="qi-badge bi-hard">HARD</div></a>
+        <a class="qi" href="problem.php?subject=algebra"><div class="qi-ico" style="background:var(--cdim);border:1px solid var(--cyan)">∑</div><div><div class="qi-name">Algebra Castle</div><div class="qi-sub">Equations, variables</div></div><div class="qi-badge bi-med">MEDIUM</div></a>
+        <a class="qi" href="problem.php?subject=arithmetic"><div class="qi-ico" style="background:var(--gdim);border:1px solid var(--green)">🔢</div><div><div class="qi-name">Arithmetic Arena</div><div class="qi-sub">Addition, multiplication</div></div><div class="qi-badge bi-easy">EASY</div></a>
+        <a class="qi" href="problem.php?subject=fractions"><div class="qi-ico" style="background:var(--vdim);border:1px solid var(--violet)">½</div><div><div class="qi-name">Fraction Dungeon</div><div class="qi-sub">Fractions, decimals</div></div><div class="qi-badge bi-med">MEDIUM</div></a>
+        <a class="qi" href="problem.php?subject=geometry"><div class="qi-ico" style="background:var(--adim);border:1px solid var(--amber)">📐</div><div><div class="qi-name">Geometry Galaxy</div><div class="qi-sub">Shapes, angles</div></div><div class="qi-badge bi-hard">HARD</div></a>
         <div class="qi locked"><div class="qi-ico" style="background:var(--s3)">🔬</div><div><div class="qi-name">Calculus Cavern</div><div class="qi-sub">Unlock at Level 10</div></div><div class="qi-badge bi-lock">LOCKED</div></div>
       </div>
     </div>
@@ -259,7 +299,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:0 28px
         <div style="text-align:center;padding:30px 0;color:var(--tdim);font-size:0.85em;font-style:italic">🎮 Solve some problems to see your chart!</div>
       <?php else:?>
       <svg width="100%" viewBox="0 0 400 130" id="perfChart">
-        <defs><linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(0,229,255,0.25)"/><stop offset="100%" stop-color="rgba(0,229,255,0)"/></linearGradient></defs>
+        <defs><linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--chart-area-start)"/><stop offset="100%" stop-color="var(--chart-area-end)"/></linearGradient></defs>
         <line class="ct-grid" x1="40" y1="10" x2="40" y2="105"/><line class="ct-grid" x1="40" y1="105" x2="400" y2="105"/>
         <line class="ct-grid" x1="40" y1="57" x2="400" y2="57" stroke-dasharray="3,3"/>
         <text class="ct-label" x="32" y="14" text-anchor="end">100%</text>
@@ -351,9 +391,26 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:0 28px
       <?php if(!empty($notifRows)):?><a href="problem.php" style="display:block;margin-top:10px;text-align:center;font-family:'Syne',sans-serif;font-size:0.75em;color:var(--cyan);text-decoration:none">↺ Practice these again →</a><?php endif;?>
     </div>
   </div>
-
 </main>
+
 <script>
+// ── Theme toggle ──────────────────────────────────────────────
+const html  = document.documentElement;
+const saved = localStorage.getItem('mq_theme') || 'dark';
+applyTheme(saved);
+
+function applyTheme(theme) {
+  html.setAttribute('data-theme', theme);
+  localStorage.setItem('mq_theme', theme);
+  document.getElementById('themeIcon').textContent  = theme === 'dark' ? '☀️' : '🌙';
+  document.getElementById('themeLabel').textContent = theme === 'dark' ? 'Light' : 'Dark';
+}
+
+function toggleTheme() {
+  applyTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+}
+
+// ── Performance chart ─────────────────────────────────────────
 const perfData=<?=json_encode(array_map(fn($r)=>(int)$r['acc'],$perfRows))?>;
 const xs=[80,133,186,239,292,345,398];
 function dataToY(v){return 105-(v/100)*90;}
@@ -367,6 +424,8 @@ function buildChart(){
   pts.forEach(p=>{const c=document.createElementNS('http://www.w3.org/2000/svg','circle');c.setAttribute('class','ct-dot');c.setAttribute('cx',p.x);c.setAttribute('cy',p.y);c.setAttribute('r','4');svg.appendChild(c);});
 }
 buildChart();
+
+// ── Daily timer ───────────────────────────────────────────────
 function updateTimer(){const now=new Date(),mid=new Date(now);mid.setHours(24,0,0,0);const d=mid-now,h=Math.floor(d/3600000),m=Math.floor((d%3600000)/60000),s=Math.floor((d%60000)/1000);document.getElementById('dailyTimer').textContent=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;}
 updateTimer();setInterval(updateTimer,1000);
 </script>
