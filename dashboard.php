@@ -1,53 +1,8 @@
 <?php
 require_once 'config.php';
-$user = require_login('student');
-
-$stmt = db()->prepare('SELECT * FROM student_stats WHERE user_id=?');
-$stmt->execute([$user['id']]);
-$stats = $stmt->fetch() ?: [];
-
-$xp       = (int)($stats['xp']               ?? 0);
-$level    = (int)($stats['level']            ?? 1);
-$streak   = (int)($stats['streak']           ?? 0);
-$solved   = (int)($stats['problems_solved']  ?? 0);
-$correct  = (int)($stats['problems_correct'] ?? 0);
-$accuracy = $solved > 0 ? round(($correct / $solved) * 100) : 0;
-$xpPct    = min(100, round(($xp % 500) / 500 * 100));
-
-$lb = db()->query('SELECT u.full_name,u.avatar,s.xp FROM users u JOIN student_stats s ON s.user_id=u.id WHERE u.role="student" ORDER BY s.xp DESC LIMIT 5')->fetchAll();
-
-$perf = db()->prepare('SELECT DATE(attempted_at) as day, ROUND(SUM(is_correct)/COUNT(*)*100) as acc FROM attempts WHERE user_id=? AND attempted_at >= DATE_SUB(NOW(),INTERVAL 7 DAY) GROUP BY DATE(attempted_at) ORDER BY day ASC');
-$perf->execute([$user['id']]);
-$perfRows = $perf->fetchAll();
-
-$subj = db()->prepare('SELECT subject, ROUND(SUM(is_correct)/COUNT(*)*100) as acc FROM attempts WHERE user_id=? GROUP BY subject');
-$subj->execute([$user['id']]);
-$subjRows = $subj->fetchAll(PDO::FETCH_KEY_PAIR);
-
-$badges = db()->prepare('SELECT b.slug FROM badges b JOIN user_badges ub ON ub.badge_id=b.id WHERE ub.user_id=?');
-$badges->execute([$user['id']]);
-$earnedSlugs = array_column($badges->fetchAll(),'slug');
-
-$allBadges=[
-  ['slug'=>'first_win','icon'=>'🥇','name'=>'First Win'],
-  ['slug'=>'sharpshooter','icon'=>'🎯','name'=>'Sharp'],
-  ['slug'=>'lightning','icon'=>'⚡','name'=>'Quick'],
-  ['slug'=>'champion','icon'=>'🏆','name'=>'Champ'],
-  ['slug'=>'streak','icon'=>'🔥','name'=>'Streak'],
-  ['slug'=>'scholar','icon'=>'📚','name'=>'Scholar'],
-  ['slug'=>'dragon','icon'=>'🐉','name'=>'Dragon'],
-  ['slug'=>'wizard','icon'=>'⚗','name'=>'Wizard'],
-];
-
-$asgn = db()->query('SELECT title,subject,due_date,difficulty FROM assignments ORDER BY due_date ASC LIMIT 3')->fetchAll();
-
-$notifs = db()->prepare('SELECT question,subject,attempted_at FROM attempts WHERE user_id=? AND is_correct=0 ORDER BY attempted_at DESC LIMIT 3');
-$notifs->execute([$user['id']]);
-$notifRows = $notifs->fetchAll();
-
-$days=['M','T','W','T','F','S','S'];
-$today=(int)date('N');
-?><!DOCTYPE html>
+require_login();
+?>
+<!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
@@ -209,12 +164,11 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:0 28px
     <a href="profile.php"     class="nav-link">🧙 Profile</a>
   </div>
   <div class="nav-right">
-    <div class="nav-stat">⭐ <b><?= number_format($xp) ?></b></div>
-    <div class="nav-stat">🔥 <b><?= $streak ?></b></div>
-    <a href="notifications.php" class="notif-btn">🔔<?php if(count($notifRows)>0):?><span class="notif-badge"><?=count($notifRows)?></span><?php endif;?></a>
-    <a href="profile.php" class="nav-avatar"><?= htmlspecialchars($user['avatar']) ?></a>
+    <div class="nav-stat">⭐ <b>0</b></div>
+    <div class="nav-stat">🔥 <b>0</b></div>
+    <a href="notifications.php" class="notif-btn">🔔</a>
+    <a href="profile.php" class="nav-avatar">👨‍🎓</a>
     <a href="settings.php" class="nav-link" style="padding:6px 10px">⚙</a>
-    <!-- Theme toggle in nav -->
     <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">
       <span id="themeIcon">☀️</span><span id="themeLabel">Light</span>
     </button>
@@ -225,41 +179,45 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:0 28px
 <main class="main">
   <div class="g4">
     <div class="panel scard" style="animation-delay:.04s">
-      <div class="sc-top"><div class="sc-icon cyan">⭐</div><div class="sc-delta">Level <?=$level?></div></div>
-      <div class="sc-val cyan"><?=number_format($xp)?></div><div class="sc-label">Total XP Earned</div>
+      <div class="sc-top"><div class="sc-icon cyan">⭐</div><div class="sc-delta">Level 1</div></div>
+      <div class="sc-val cyan">0</div><div class="sc-label">Total XP Earned</div>
     </div>
     <div class="panel scard" style="animation-delay:.08s">
       <div class="sc-top"><div class="sc-icon green">✓</div><div class="sc-delta">All time</div></div>
-      <div class="sc-val green"><?=$solved?></div><div class="sc-label">Problems Solved</div>
+      <div class="sc-val green">0</div><div class="sc-label">Problems Solved</div>
     </div>
     <div class="panel scard" style="animation-delay:.12s">
       <div class="sc-top"><div class="sc-icon amber">🎯</div><div class="sc-delta">Overall</div></div>
-      <div class="sc-val amber"><?=$accuracy?>%</div><div class="sc-label">Accuracy Rate</div>
+      <div class="sc-val amber">0%</div><div class="sc-label">Accuracy Rate</div>
     </div>
     <div class="panel scard" style="animation-delay:.16s">
       <div class="sc-top"><div class="sc-icon violet">🔥</div><div class="sc-delta">Current</div></div>
-      <div class="sc-val violet"><?=$streak?></div><div class="sc-label">Day Streak</div>
+      <div class="sc-val violet">0</div><div class="sc-label">Day Streak</div>
     </div>
   </div>
 
   <div class="ghero">
     <div class="panel" style="animation-delay:.2s">
       <div class="ptitle">🧙 Profile <a href="profile.php">View →</a></div>
-      <div class="char-av"><?=htmlspecialchars($user['avatar'])?></div>
-      <div class="char-name"><?=htmlspecialchars($user['full_name'])?></div>
-      <div class="char-title">Level <?=$level?> · <?=htmlspecialchars($user['class_name']??'')?></div>
-      <div class="xp-row"><span>XP to next level</span><span><?=number_format($xp%500)?> / 500</span></div>
-      <div class="bar"><div class="bar-fill cyan" style="width:<?=$xpPct?>%"></div></div>
+      <div class="char-av">👨‍🎓</div>
+      <div class="char-name">Alex M.</div>
+      <div class="char-title">Level 1 · </div>
+      <div class="xp-row"><span>XP to next level</span><span>0 / 500</span></div>
+      <div class="bar"><div class="bar-fill cyan" style="width:0%"></div></div>
       <div class="mini-stats">
-        <div class="ms-box"><div class="ms-val"><?=$solved?></div><div class="ms-lbl">Solved</div></div>
-        <div class="ms-box"><div class="ms-val"><?=$accuracy?>%</div><div class="ms-lbl">Accuracy</div></div>
-        <div class="ms-box"><div class="ms-val"><?=$streak?>🔥</div><div class="ms-lbl">Streak</div></div>
+        <div class="ms-box"><div class="ms-val">0</div><div class="ms-lbl">Solved</div></div>
+        <div class="ms-box"><div class="ms-val">0%</div><div class="ms-lbl">Accuracy</div></div>
+        <div class="ms-box"><div class="ms-val">0🔥</div><div class="ms-lbl">Streak</div></div>
       </div>
       <div style="font-family:'Syne',sans-serif;font-size:0.67em;font-weight:600;letter-spacing:0.14em;color:var(--tdim);text-transform:uppercase;margin-bottom:10px">📅 This Week</div>
       <div class="streak-row">
-        <?php for($i=1;$i<=7;$i++):$cls=$i<$today?'on':($i===$today?'now':'');?>
-        <div class="sk-dot <?=$cls?>"><?=$days[$i-1]?></div>
-        <?php endfor;?>
+        <div class="sk-dot on">M</div>
+        <div class="sk-dot on">T</div>
+        <div class="sk-dot now">W</div>
+        <div class="sk-dot ">T</div>
+        <div class="sk-dot ">F</div>
+        <div class="sk-dot ">S</div>
+        <div class="sk-dot ">S</div>
       </div>
       <br><button class="cta" onclick="location.href='problem.php'">⚔ START BATTLE</button>
     </div>
@@ -295,60 +253,54 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:0 28px
   <div class="g2">
     <div class="panel" style="animation-delay:.32s">
       <div class="ptitle">📈 7-Day Performance <a href="progress.php">Full Report →</a></div>
-      <?php if(empty($perfRows)):?>
-        <div style="text-align:center;padding:30px 0;color:var(--tdim);font-size:0.85em;font-style:italic">🎮 Solve some problems to see your chart!</div>
-      <?php else:?>
-      <svg width="100%" viewBox="0 0 400 130" id="perfChart">
-        <defs><linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--chart-area-start)"/><stop offset="100%" stop-color="var(--chart-area-end)"/></linearGradient></defs>
-        <line class="ct-grid" x1="40" y1="10" x2="40" y2="105"/><line class="ct-grid" x1="40" y1="105" x2="400" y2="105"/>
-        <line class="ct-grid" x1="40" y1="57" x2="400" y2="57" stroke-dasharray="3,3"/>
-        <text class="ct-label" x="32" y="14" text-anchor="end">100%</text>
-        <text class="ct-label" x="32" y="61" text-anchor="end">50%</text>
-        <text class="ct-label" x="32" y="108" text-anchor="end">0%</text>
-        <path class="ct-area" id="chartArea" d=""/><path class="ct-line" id="chartLine" d=""/>
-      </svg>
-      <?php endif;?>
+      <div style="text-align:center;padding:30px 0;color:var(--tdim);font-size:0.85em;font-style:italic">🎮 Solve some problems to see your chart!</div>
     </div>
 
     <div class="panel" style="animation-delay:.36s">
       <div class="ptitle">📋 Upcoming Assignments <a href="assignments.php">View All →</a></div>
-      <?php if(empty($asgn)):?>
-        <div style="color:var(--tdim);font-size:0.85em;font-style:italic;padding:10px 0">No assignments yet.</div>
-      <?php else: foreach($asgn as $a):
-        $dc=$a['difficulty']==='easy'?'var(--green)':($a['difficulty']==='medium'?'var(--amber)':'var(--red)');
-        $dl=(int)ceil((strtotime($a['due_date'])-time())/86400);
-      ?>
       <a class="asgn-item" href="assignments.php">
         <div class="asgn-icon">📝</div>
         <div style="flex:1;min-width:0">
-          <div class="asgn-name"><?=htmlspecialchars($a['title'])?></div>
-          <div class="asgn-meta"><?=htmlspecialchars($a['subject'])?> · <span style="color:<?=$dc?>"><?=ucfirst($a['difficulty'])?></span></div>
+          <div class="asgn-name">Algebra Basics</div>
+          <div class="asgn-meta">Algebra · <span style="color:var(--green)">Easy</span></div>
         </div>
-        <div style="font-family:'Syne',sans-serif;font-size:0.7em;font-weight:600;color:var(--amber);flex-shrink:0"><?=$dl>0?$dl.'d left':'Due today'?></div>
+        <div style="font-family:'Syne',sans-serif;font-size:0.7em;font-weight:600;color:var(--amber);flex-shrink:0">Due today</div>
       </a>
-      <?php endforeach; endif;?>
+      <a class="asgn-item" href="assignments.php">
+        <div class="asgn-icon">📝</div>
+        <div style="flex:1;min-width:0">
+          <div class="asgn-name">Fraction Challenge</div>
+          <div class="asgn-meta">Fractions · <span style="color:var(--amber)">Medium</span></div>
+        </div>
+        <div style="font-family:'Syne',sans-serif;font-size:0.7em;font-weight:600;color:var(--amber);flex-shrink:0">4d left</div>
+      </a>
+      <a class="asgn-item" href="assignments.php">
+        <div class="asgn-icon">📝</div>
+        <div style="flex:1;min-width:0">
+          <div class="asgn-name">Geometry Quiz</div>
+          <div class="asgn-meta">Geometry · <span style="color:var(--amber)">Medium</span></div>
+        </div>
+        <div style="font-family:'Syne',sans-serif;font-size:0.7em;font-weight:600;color:var(--amber);flex-shrink:0">9d left</div>
+      </a>
     </div>
   </div>
 
   <div class="g3">
     <div class="panel" style="animation-delay:.4s">
       <div class="ptitle">🏅 Leaderboard <a href="leaderboard.php">Full →</a></div>
-      <?php foreach($lb as $i=>$row):$isYou=$row['full_name']===$user['full_name'];?>
-      <div class="lb-item <?=$isYou?'you':''?>">
-        <span class="lb-rank <?=$i<3?'top':''?>"><?=$i+1?></span>
-        <div class="lb-av"><?=htmlspecialchars($row['avatar'])?></div>
-        <span class="lb-name"><?=htmlspecialchars($row['full_name'])?><?=$isYou?' ✦':''?></span>
-        <span class="lb-pts" <?=$isYou?'style="color:var(--cyan)"':''?>><?=number_format($row['xp'])?></span>
-      </div>
-      <?php endforeach;?>
     </div>
 
     <div class="panel" style="animation-delay:.44s">
       <div class="ptitle">🏆 Badges <a href="profile.php">All →</a></div>
       <div class="badges-grid">
-        <?php foreach($allBadges as $b):$locked=!in_array($b['slug'],$earnedSlugs);?>
-        <div class="badge-box <?=$locked?'locked':''?>" title="<?=htmlspecialchars($b['name'])?>"><?=$b['icon']?><span><?=htmlspecialchars($b['name'])?></span></div>
-        <?php endforeach;?>
+        <div class="badge-box locked" title="First Win">🥇<span>First Win</span></div>
+        <div class="badge-box locked" title="Sharp">🎯<span>Sharp</span></div>
+        <div class="badge-box locked" title="Quick">⚡<span>Quick</span></div>
+        <div class="badge-box locked" title="Champ">🏆<span>Champ</span></div>
+        <div class="badge-box locked" title="Streak">🔥<span>Streak</span></div>
+        <div class="badge-box locked" title="Scholar">📚<span>Scholar</span></div>
+        <div class="badge-box locked" title="Dragon">🐉<span>Dragon</span></div>
+        <div class="badge-box locked" title="Wizard">⚗<span>Wizard</span></div>
       </div>
     </div>
 
@@ -366,29 +318,31 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:0 28px
   <div class="g2">
     <div class="panel" style="animation-delay:.52s">
       <div class="ptitle">📊 Subject Mastery <a href="progress.php">Details →</a></div>
-      <?php $sd=['Algebra'=>'var(--cyan)','Arithmetic'=>'var(--green)','Fractions'=>'var(--amber)','Geometry'=>'#a78bfa','Statistics'=>'var(--red)'];
-      foreach($sd as $nm=>$col):$v=(int)($subjRows[strtolower($nm)]??0);?>
       <div style="margin-bottom:13px">
-        <div style="display:flex;justify-content:space-between;font-size:0.81em;margin-bottom:5px"><span><?=$nm?></span><span style="font-family:'Syne',sans-serif;font-weight:600;color:var(--tdim)"><?=$v?>%</span></div>
-        <div class="bar" style="height:6px;margin-bottom:0"><div class="bar-fill" style="width:<?=$v?>%;background:<?=$col?>"></div></div>
+        <div style="display:flex;justify-content:space-between;font-size:0.81em;margin-bottom:5px"><span>Algebra</span><span style="font-family:'Syne',sans-serif;font-weight:600;color:var(--tdim)">0%</span></div>
+        <div class="bar" style="height:6px;margin-bottom:0"><div class="bar-fill" style="width:0%;background:var(--cyan)"></div></div>
       </div>
-      <?php endforeach;?>
+      <div style="margin-bottom:13px">
+        <div style="display:flex;justify-content:space-between;font-size:0.81em;margin-bottom:5px"><span>Arithmetic</span><span style="font-family:'Syne',sans-serif;font-weight:600;color:var(--tdim)">0%</span></div>
+        <div class="bar" style="height:6px;margin-bottom:0"><div class="bar-fill" style="width:0%;background:var(--green)"></div></div>
+      </div>
+      <div style="margin-bottom:13px">
+        <div style="display:flex;justify-content:space-between;font-size:0.81em;margin-bottom:5px"><span>Fractions</span><span style="font-family:'Syne',sans-serif;font-weight:600;color:var(--tdim)">0%</span></div>
+        <div class="bar" style="height:6px;margin-bottom:0"><div class="bar-fill" style="width:0%;background:var(--amber)"></div></div>
+      </div>
+      <div style="margin-bottom:13px">
+        <div style="display:flex;justify-content:space-between;font-size:0.81em;margin-bottom:5px"><span>Geometry</span><span style="font-family:'Syne',sans-serif;font-weight:600;color:var(--tdim)">0%</span></div>
+        <div class="bar" style="height:6px;margin-bottom:0"><div class="bar-fill" style="width:0%;background:#a78bfa"></div></div>
+      </div>
+      <div style="margin-bottom:13px">
+        <div style="display:flex;justify-content:space-between;font-size:0.81em;margin-bottom:5px"><span>Statistics</span><span style="font-family:'Syne',sans-serif;font-weight:600;color:var(--tdim)">0%</span></div>
+        <div class="bar" style="height:6px;margin-bottom:0"><div class="bar-fill" style="width:0%;background:var(--red)"></div></div>
+      </div>
     </div>
 
     <div class="panel" style="animation-delay:.56s">
       <div class="ptitle">🔔 Notifications <a href="notifications.php">All →</a></div>
-      <?php if(empty($notifRows)):?>
-        <div style="color:var(--tdim);font-size:0.85em;font-style:italic;padding:10px 0">✅ You're all caught up!</div>
-      <?php else: foreach($notifRows as $n):?>
-      <div class="notif-item">
-        <div style="font-size:1.1em;flex-shrink:0">❌</div>
-        <div>
-          <div class="notif-text">Missed: <b><?=htmlspecialchars(substr($n['question'],0,50))?>...</b></div>
-          <div class="notif-time"><?=htmlspecialchars($n['subject'])?> · <?=date('M j',strtotime($n['attempted_at']))?></div>
-        </div>
-      </div>
-      <?php endforeach; endif;?>
-      <?php if(!empty($notifRows)):?><a href="problem.php" style="display:block;margin-top:10px;text-align:center;font-family:'Syne',sans-serif;font-size:0.75em;color:var(--cyan);text-decoration:none">↺ Practice these again →</a><?php endif;?>
+      <div style="color:var(--tdim);font-size:0.85em;font-style:italic;padding:10px 0">✅ You're all caught up!</div>
     </div>
   </div>
 </main>
@@ -411,7 +365,7 @@ function toggleTheme() {
 }
 
 // ── Performance chart ─────────────────────────────────────────
-const perfData=<?=json_encode(array_map(fn($r)=>(int)$r['acc'],$perfRows))?>;
+const perfData=[];
 const xs=[80,133,186,239,292,345,398];
 function dataToY(v){return 105-(v/100)*90;}
 function buildChart(){
@@ -429,5 +383,7 @@ buildChart();
 function updateTimer(){const now=new Date(),mid=new Date(now);mid.setHours(24,0,0,0);const d=mid-now,h=Math.floor(d/3600000),m=Math.floor((d%3600000)/60000),s=Math.floor((d%60000)/1000);document.getElementById('dailyTimer').textContent=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;}
 updateTimer();setInterval(updateTimer,1000);
 </script>
+
+<?php require_once 'chat_bubble.php'; ?>
 </body>
 </html>
